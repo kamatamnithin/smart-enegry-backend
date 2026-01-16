@@ -8,7 +8,7 @@ import json
 import math
 
 app = Flask(__name__)
-CORS(app, origins=['https://smartenergy-dashboard.vercel.app', 'http://localhost:5173'])
+CORS(app, origins=['https://smartenergy-dashboard.vercel.app', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'])
 
 # Global model variable
 MODEL_PATH = 'random_forest_model.pkl'
