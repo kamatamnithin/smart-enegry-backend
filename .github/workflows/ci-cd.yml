@@ -1,0 +1,109 @@
+name: Backend API CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test API functions
+      run: |
+        # Test health endpoint
+        python -c "
+        import sys
+        sys.path.append('.')
+        from api.health import handler
+        result = handler({}, {})
+        print('Health check result:', result)
+        assert 'status' in result['body']
+        print('✅ Health endpoint test passed')
+        "
+
+        # Test predict endpoint with sample data
+        python -c "
+        import sys
+        sys.path.append('.')
+        from api.predict import handler
+        import json
+
+        # Sample prediction request
+        event = {
+            'body': json.dumps({
+                'features': {
+                    'temperature': 25.0,
+                    'humidity': 60.0,
+                    'wind_speed': 5.0,
+                    'pressure': 1013.0,
+                    'hour': 12,
+                    'day_of_week': 1,
+                    'month': 6,
+                    'season': 'summer',
+                    'is_holiday': False,
+                    'building_type': 'residential',
+                    'floor_area': 100.0,
+                    'occupancy': 3,
+                    'appliance_count': 5,
+                    'lighting_count': 8,
+                    'renewable_energy': True,
+                    'energy_efficiency': 'medium'
+                }
+            })
+        }
+
+        result = handler(event, {})
+        print('Prediction result:', result)
+        assert 'statusCode' in result
+        assert result['statusCode'] == 200
+        print('✅ Prediction endpoint test passed')
+        "
+
+    - name: Verify model loading
+      run: |
+        python -c "
+        import pickle
+        import os
+        print('Current directory:', os.getcwd())
+        print('Files in directory:', os.listdir('.'))
+
+        # Load and verify model
+        with open('random_forest_model.pkl', 'rb') as f:
+            model_data = pickle.load(f)
+
+        print('Model loaded successfully')
+        print('Model type:', type(model_data.get('model', 'No model key')))
+
+        # Check feature columns
+        if 'feature_columns' in model_data:
+            print('Feature columns:', len(model_data['feature_columns']), 'features')
+            print('✅ Model verification passed')
+        else:
+            print('❌ No feature_columns found in model')
+            exit(1)
+        "
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Deploy to Vercel
+      run: echo "✅ Tests passed - ready for Vercel deployment"
+      # Note: Vercel deployment happens automatically via GitHub integration
