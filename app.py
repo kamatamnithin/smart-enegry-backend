@@ -6,9 +6,13 @@ from datetime import datetime
 import os
 import json
 import math
+import warnings
 
 app = Flask(__name__)
 CORS(app, origins=['https://smartenergy-dashboard.vercel.app', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'])
+
+# Suppress sklearn warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
 # Global model variable
 MODEL_PATH = 'random_forest_model.pkl'

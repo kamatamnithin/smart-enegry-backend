@@ -6,13 +6,17 @@ import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import math
+import warnings
+
+# Suppress sklearn warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
 # Initialize Flask app for Vercel
 app = Flask(__name__)
 CORS(app, origins=['https://smartenergy-dashboard.vercel.app', 'http://localhost:5173'])
 
 # Global model variable
-MODEL_PATH = 'random_forest_model.pkl'
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'random_forest_model.pkl')
 model = None
 
 # Load model on startup

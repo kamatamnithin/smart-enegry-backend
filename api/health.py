@@ -1,9 +1,10 @@
 import pickle
 from datetime import datetime
 import json
+import os
 
 # Global model variable
-MODEL_PATH = 'random_forest_model.pkl'
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'random_forest_model.pkl')
 model = None
 
 def load_model():
