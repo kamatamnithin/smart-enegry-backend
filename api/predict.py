@@ -49,7 +49,11 @@ def transform_features_for_prediction(features):
     is_business_hour = features.get('is_business_hour', 1)
 
     # Simplified lag features
-    base_consumption = 50.0
+    base_consumption = 40.0 + (temperature - 20.0) * 0.5 + (humidity - 50.0) * 0.1
+    
+    # Seasonal adjustment
+    seasonal_multiplier = 1.0 + 0.2 * math.sin(2 * math.pi * (month - 1) / 12)
+    base_consumption *= seasonal_multiplier
     hour_multiplier = 1.0 + 0.3 * math.sin(2 * math.pi * (hour - 6) / 12)
     weekend_multiplier = 1.2 if is_weekend else 1.0
     business_multiplier = 1.1 if is_business_hour else 0.8
